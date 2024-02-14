@@ -3,12 +3,13 @@ import { useEffect, useReducer } from "react";
 import Header from "./Header";
 import Main from "./Main";
 import StartScreen from "./StartScreen";
+import Question from "./Question";
 import Error from "./Error";
 import Loader from "./Loader";
 
 const initialState = {
   questions: [],
-
+  index: 0,
   // type of status : 👇
   // loading, error, ready, active, finished
   status: "loading",
@@ -22,13 +23,19 @@ const reducer = function (state, action) {
     case "dataFailed":
       return { ...state, status: "error" };
 
+    case "start":
+      return { ...state, status: "active" };
+
     default:
       throw new Error("Unknown action type !");
   }
 };
 
 function App() {
-  const [{ status, questions }, dispatch] = useReducer(reducer, initialState);
+  const [{ status, questions, index }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
   const numQuestions = questions.length;
 
   useEffect(function () {
@@ -45,7 +52,10 @@ function App() {
       <Main>
         {status === "loading" && <Loader />}
         {status === "error" && <Error />}
-        {status === "ready" && <StartScreen numQuestions={numQuestions} />}
+        {status === "ready" && (
+          <StartScreen numQuestions={numQuestions} dispatch={dispatch} />
+        )}
+        {status === "active" && <Question question={questions[index]} />}
       </Main>
     </div>
   );
