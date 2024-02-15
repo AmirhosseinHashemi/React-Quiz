@@ -8,6 +8,7 @@ import Error from "./Error";
 import Loader from "./Loader";
 import NextQuestion from "./NextQuestion";
 import Progress from "./Progress";
+import FinishScreen from "./FinishScreen";
 
 const initialState = {
   questions: [],
@@ -17,6 +18,7 @@ const initialState = {
   status: "loading",
   answer: null,
   points: 0,
+  highScore: 0,
 };
 
 const reducer = function (state, action) {
@@ -48,16 +50,22 @@ const reducer = function (state, action) {
         answer: null,
       };
 
+    case "finish":
+      return {
+        ...state,
+        status: "finish",
+        highScore:
+          state.points > state.highScore ? state.points : state.highScore,
+      };
+
     default:
       throw new Error("Unknown action type !");
   }
 };
 
 function App() {
-  const [{ status, questions, index, answer, points }, dispatch] = useReducer(
-    reducer,
-    initialState
-  );
+  const [{ status, questions, index, answer, points, highScore }, dispatch] =
+    useReducer(reducer, initialState);
   const numQuestions = questions.length;
   const maxPossiblePoints = questions.reduce(
     (prev, curr) => prev + curr.points,
@@ -95,8 +103,20 @@ function App() {
               dispatch={dispatch}
               answer={answer}
             />
-            <NextQuestion dispatch={dispatch} answer={answer} />
+            <NextQuestion
+              dispatch={dispatch}
+              answer={answer}
+              index={index}
+              numQuestions={numQuestions}
+            />
           </>
+        )}
+        {status === "finish" && (
+          <FinishScreen
+            maxPossiblePoints={maxPossiblePoints}
+            points={points}
+            highScore={highScore}
+          />
         )}
       </Main>
     </div>
